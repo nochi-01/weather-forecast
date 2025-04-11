@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>天気予報</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 2em;
+        }
+        #city {
+            font-size: 0.9em;
+            padding: 0.2em 0.5em;
+            width: auto;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 30px;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+        img {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <h1>天気予報</h1>
+    <label for="city">都市を選択：</label>
+    <select id="city">
+        <option value="" selected hidden>都市を選択してください</option>
+        <option value="Sapporo">北海道（札幌）</option>
+        <option value="Aomori">青森県（青森）</option>
+        <option value="Morioka">岩手県（盛岡）</option>
+        <option value="Sendai">宮城県（仙台）</option>
+        <option value="Akita">秋田県（秋田）</option>
+        <option value="Yamagata">山形県（山形）</option>
+        <option value="Fukushima">福島県（福島）</option>
+        <option value="Mito">茨城県（水戸）</option>
+        <option value="Utsunomiya">栃木県（宇都宮）</option>
+        <option value="Maebashi">群馬県（前橋）</option>
+        <option value="Saitama">埼玉県（さいたま）</option>
+        <option value="Chiba">千葉県（千葉）</option>
+        <option value="Tokyo">東京都（東京）</option>
+        <option value="Yokohama">神奈川県（横浜）</option>
+        <option value="Niigata">新潟県（新潟）</option>
+        <option value="Toyama">富山県（富山）</option>
+        <option value="Kanazawa">石川県（金沢）</option>
+        <option value="Fukui">福井県（福井）</option>
+        <option value="Kofu">山梨県（甲府）</option>
+        <option value="Nagano">長野県（長野）</option>
+        <option value="Gifu">岐阜県（岐阜）</option>
+        <option value="Shizuoka">静岡県（静岡）</option>
+        <option value="Nagoya">愛知県（名古屋）</option>
+        <option value="Tsu">三重県（津）</option>
+        <option value="Otsu">滋賀県（大津）</option>
+        <option value="Kyoto">京都府（京都）</option>
+        <option value="Osaka">大阪府（大阪）</option>
+        <option value="Kobe">兵庫県（神戸）</option>
+        <option value="Nara">奈良県（奈良）</option>
+        <option value="Wakayama">和歌山県（和歌山）</option>
+        <option value="Tottori">鳥取県（鳥取）</option>
+        <option value="Matsue">島根県（松江）</option>
+        <option value="Okayama">岡山県（岡山）</option>
+        <option value="Hiroshima">広島県（広島）</option>
+        <option value="Yamaguchi">山口県（山口）</option>
+        <option value="Tokushima">徳島県（徳島）</option>
+        <option value="Takamatsu">香川県（高松）</option>
+        <option value="Matsuyama">愛媛県（松山）</option>
+        <option value="Kochi">高知県（高知）</option>
+        <option value="Fukuoka">福岡県（福岡）</option>
+        <option value="Saga">佐賀県（佐賀）</option>
+        <option value="Nagasaki">長崎県（長崎）</option>
+        <option value="Kumamoto">熊本県（熊本）</option>
+        <option value="Oita">大分県（大分）</option>
+        <option value="Miyazaki">宮崎県（宮崎）</option>
+        <option value="Kagoshima">鹿児島県（鹿児島）</option>
+        <option value="Naha">沖縄県（那覇）</option>
+    </select>
+
+    <div id="table-container"></div>
+
+    <script>
+        const citySelector = document.getElementById("city");
+        const tableContainer = document.getElementById("table-container");
+
+        citySelector.addEventListener("change", async () => {
+            const city = citySelector.value;
+            if (!city) {
+                tableContainer.innerHTML = "";
+                return;
+            }
+
+            const response = await fetch(`/weather/${city}`);
+            const data = await response.json();
+
+            let tableHTML = `<table><thead><tr>
+                <th>日時</th>
+                <th>曜日</th>
+                <th>気温 (℃)</th>
+                <th>体感気温 (℃)</th>
+                <th>最低気温 (℃)</th>
+                <th>最高気温 (℃)</th>
+                <th>湿度 (%)</th>
+                <th>気圧 (hPa)</th>
+                <th>雲 (%)</th>
+                <th>天気</th>
+                <th>風速 (m/s)</th>
+                <th>風向 (°)</th>
+                <th>降水確率 (%)</th>
+                <th>降水量 (mm)</th>
+                <th>降雪量 (mm)</th>
+            </tr></thead><tbody>`;
+
+            data.forEach(item => {
+                const dateTime = new Date(item.forecast_time).toLocaleString("ja-JP");
+                const weekday = item.weekday ?? "-";
+                tableHTML += `<tr>
+                    <td>${dateTime}</td>
+                    <td>${weekday}</td>
+                    <td>${item.temp ?? "-"}</td>
+                    <td>${item.feels_like ?? "-"}</td>
+                    <td>${item.temp_min ?? "-"}</td>
+                    <td>${item.temp_max ?? "-"}</td>
+                    <td>${item.humidity ?? "-"}</td>
+                    <td>${item.pressure ?? "-"}</td>
+                    <td>${item.clouds ?? "-"}</td>
+                    <td><img src="https://openweathermap.org/img/wn/${item.icon}@2x.png" alt="icon"> ${item.weather_description ?? "-"}</td>
+                    <td>${item.wind_speed ?? "-"}</td>
+                    <td>${item.wind_deg ?? "-"}</td>
+                    <td>${item.pop ?? "-"}</td>
+                    <td>${item.rain_mm ?? "-"}</td>
+                    <td>${item.snow_mm ?? "-"}</td>
+                </tr>`;
+            });
+
+            tableHTML += `</tbody></table>`;
+            tableContainer.innerHTML = tableHTML;
+        });
+    </script>
+</body>
+</html>
+
